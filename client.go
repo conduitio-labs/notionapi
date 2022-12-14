@@ -148,7 +148,7 @@ func (c *Client) request(ctx context.Context, method string, urlStr string, quer
 		retryAfter := res.Header["Retry-After"][0]
 		waitSeconds, err := strconv.Atoi(retryAfter)
 		if err != nil {
-			// we don't know how much to wait to retry,
+			// we don't know how long to wait to retry,
 			// so we won't retry at all
 			break
 		}
