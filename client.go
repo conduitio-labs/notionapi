@@ -10,12 +10,14 @@ import (
 	"net/url"
 	"reflect"
 	"strconv"
+	"time"
 )
 
 const (
-	apiURL        = "https://api.notion.com"
-	apiVersion    = "v1"
-	notionVersion = "2022-06-28"
+	apiURL            = "https://api.notion.com"
+	apiVersion        = "v1"
+	notionVersion     = "2022-06-28"
+	defaultMaxRetries = 3
 )
 
 type Token string
@@ -32,6 +34,7 @@ type Client struct {
 	baseUrl       *url.URL
 	apiVersion    string
 	notionVersion string
+	maxRetries    int
 
 	Token Token
 
@@ -54,6 +57,7 @@ func NewClient(token Token, opts ...ClientOption) *Client {
 		baseUrl:       u,
 		apiVersion:    apiVersion,
 		notionVersion: notionVersion,
+		maxRetries:    defaultMaxRetries,
 	}
 
 	c.Database = &DatabaseClient{apiClient: c}
@@ -81,6 +85,14 @@ func WithHTTPClient(client *http.Client) ClientOption {
 func WithVersion(version string) ClientOption {
 	return func(c *Client) {
 		c.notionVersion = version
+	}
+}
+
+// WithMaxRetries configured how many times should
+// a request failing with code 429 (Too Many Requests) be retried.
+func WithMaxRetries(retries int) ClientOption {
+	return func(c *Client) {
+		c.maxRetries = retries
 	}
 }
 
@@ -115,9 +127,39 @@ func (c *Client) request(ctx context.Context, method string, urlStr string, quer
 	req.Header.Add("Notion-Version", c.notionVersion)
 	req.Header.Add("Content-Type", "application/json")
 
-	res, err := c.httpClient.Do(req.WithContext(ctx))
-	if err != nil {
-		return nil, err
+	retries := 0
+	var res *http.Response
+	for {
+		var err error
+		res, err = c.httpClient.Do(req.WithContext(ctx))
+		if err != nil {
+			return nil, err
+		}
+
+		if res.StatusCode != http.StatusTooManyRequests {
+			break
+		}
+
+		if retries == c.maxRetries {
+			return nil, fmt.Errorf("max number of retries (%v) reached", c.maxRetries)
+		}
+
+		// https://developers.notion.com/reference/request-limits#rate-limits
+		retryAfter := res.Header["Retry-After"][0]
+		waitSeconds, err := strconv.Atoi(retryAfter)
+		if err != nil {
+			// we don't know how long to wait to retry,
+			// so we won't retry at all
+			break
+		}
+
+		select {
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		case <-time.After(time.Duration(waitSeconds) * time.Second):
+		}
+
+		retries++
 	}
 
 	if res.StatusCode != http.StatusOK {
