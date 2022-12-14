@@ -1,5 +1,4 @@
 # notionapi
-[![GitHub tag (latest SemVer)](https://img.shields.io/github/v/tag/jomei/notionapi?label=go%20module)](https://github.com/conduitio-labs/notionapi/tags)
 [![Go Reference](https://pkg.go.dev/badge/github.com/conduitio-labs/notionapi.svg)](https://pkg.go.dev/github.com/conduitio-labs/notionapi)
 [![Test](https://github.com/conduitio-labs/notionapi/actions/workflows/test.yml/badge.svg)](https://github.com/conduitio-labs/notionapi/actions/workflows/test.yml)
 
