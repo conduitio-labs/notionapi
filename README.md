@@ -1,6 +1,6 @@
 # notionapi
-[![Go Reference](https://pkg.go.dev/badge/github.com/conduitio-labs/notionapi.svg)](https://pkg.go.dev/github.com/conduitio-labs/notionapi)
-[![Test](https://github.com/conduitio-labs/notionapi/actions/workflows/test.yml/badge.svg)](https://github.com/conduitio-labs/notionapi/actions/workflows/test.yml)
+[![Go Reference](https://pkg.go.dev/badge/github.com/jomei/notionapi.svg)](https://pkg.go.dev/github.com/jomei/notionapi)
+[![Test](https://github.com/jomei/notionapi/actions/workflows/test.yml/badge.svg)](https://github.com/jomei/notionapi/actions/workflows/test.yml)
 
 An API client for the [Notion API](https://developers.notion.com/) implemented in Golang
 
@@ -10,7 +10,7 @@ It supports all APIs for Notion API version `2022-06-28`
 # Installation
 
 ```
-$ go get github.com/conduitio-labs/notionapi
+$ go get github.com/jomei/notionapi
 ```
 
 # Getting started
@@ -21,7 +21,7 @@ Follow Notion’s [getting started guide](https://developers.notion.com/docs/get
 Make a new `Client`
 
 ```go
-import "github.com/conduitio-labs/notionapi"
+import "github.com/jomei/notionapi"
 
 
 client := notionapi.NewClient("your-integration-token")
